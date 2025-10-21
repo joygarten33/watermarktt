@@ -18,4 +18,17 @@
   <script>
     async function analyze() {
       const input = document.getElementById('tiktokUrl').value.trim();
-      const output = document.getElementB
+      const output = document.getElementById('output');
+      output.textContent = 'Analyzing...';
+
+      try {
+        const response = await fetch(`https://watermarktt.whredone2025.workers.dev/?url=${encodeURIComponent(input)}`);
+        const data = await response.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = '❌ Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
