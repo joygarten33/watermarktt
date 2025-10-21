@@ -2,17 +2,29 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <title>تحميل فيديو TikTok عبر API Worker</title>
+  <title>عرض فيديو TikTok للتحميل</title>
 </head>
 <body>
-  <h2>أدخل رابط TikTok لتحصل على رابط التحميل</h2>
-  <input type="text" id="inputUrl" placeholder="أدخل رابط الفيديو هنا" style="width: 400px;" />
-  <button id="btnFetch">احصل على رابط التحميل</button>
+  <h2>عرض فيديو TikTok مع زر تحميل</h2>
 
-  <pre id="result" style="background:#eee; padding:10px; margin-top:20px;"></pre>
+  <video id="videoPlayer" width="480" controls>
+    <source id="videoSource" src="" type="video/mp4" />
+    متصفحك لا يدعم عرض الفيديو.
+  </video>
+
+  <br />
+  <a id="downloadBtn" href="#" download style="display:none; margin-top:10px; font-size:18px;">⬇ تحميل الفيديو</a>
+
+  <br /><br />
+  <input type="text" id="inputUrl" placeholder="أدخل رابط فيديو TikTok هنا" style="width: 400px;" />
+  <button id="btnFetch">احصل على الفيديو</button>
 
   <script>
-    const workerApiUrl = 'https://watermarktt.whredone2025.workers.dev/'; // غيره برابط الـ Worker حقك
+    const workerApiUrl = 'https://watermarktt.whredone2025.workers.dev/';
+
+    const videoPlayer = document.getElementById('videoPlayer');
+    const videoSource = document.getElementById('videoSource');
+    const downloadBtn = document.getElementById('downloadBtn');
 
     document.getElementById('btnFetch').addEventListener('click', async () => {
       const url = document.getElementById('inputUrl').value.trim();
@@ -25,17 +37,23 @@
         const response = await fetch(workerApiUrl + '?url=' + encodeURIComponent(url));
         const data = await response.json();
 
-        if (data.status === 'ok') {
-          document.getElementById('result').textContent = 
-            `نوع: ${data.extracted.type}\n` +
-            `المعرف: ${data.extracted.id}\n` +
-            `رابط التحميل (تقريبي): ${data.downloadUrl}\n` +
-            `ملاحظة: ${data.message}`;
+        if (data.status === 'ok' && data.extracted.type === 'video') {
+          const videoUrl = data.downloadUrl;
+          videoSource.src = videoUrl;
+          videoPlayer.load();
+          videoPlayer.style.display = 'block';
+
+          downloadBtn.href = videoUrl;
+          downloadBtn.style.display = 'inline-block';
         } else {
-          document.getElementById('result').textContent = 'خطأ: ' + (data.error || 'حدث خطأ غير معروف');
+          alert('خطأ: الفيديو غير متوفر أو الرابط غير صالح');
+          videoPlayer.style.display = 'none';
+          downloadBtn.style.display = 'none';
         }
       } catch (err) {
-        document.getElementById('result').textContent = 'خطأ في الاتصال: ' + err.message;
+        alert('خطأ في الاتصال: ' + err.message);
+        videoPlayer.style.display = 'none';
+        downloadBtn.style.display = 'none';
       }
     });
   </script>
